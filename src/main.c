@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "awale_lib.h"
+
+#ifdef BENCH
 #include "benchmark.h"
+#endif
 
 //test jouerCoup
 int test1(){
@@ -155,7 +158,9 @@ int main (int argc, char *argv[]){
 		else if(!strcmp(argv[i],"-p2_minmax_thread")) ia2 = IA_MINMAX_THREAD;
 		else if(!strcmp(argv[i],"-p1_alpha_beta")) ia1 = IA_ALPHA_BETA;
 		else if(!strcmp(argv[i],"-p2_alpha_beta")) ia2 = IA_ALPHA_BETA;
-		else if(!strcmp(argv[i],"-benchmark")) bench = TRUE;
+#ifdef BENCH
+		//else if(!strcmp(argv[i],"-benchmark")) bench = TRUE;
+#endif
 		else if(!strcmp(argv[i],"-p2_eval_lv1")) eval_J2 = EVAL_LV1;
 		else if(!strcmp(argv[i],"-p2_eval_lv2")) eval_J2 = EVAL_LV2;
 		else if(!strcmp(argv[i],"-p1_eval_lv1")) eval_J1 = EVAL_LV1;
@@ -174,9 +179,11 @@ int main (int argc, char *argv[]){
 		test6();*/
 		test7();
 	}
+#ifdef BENCH
 	else if(bench){
 		benchmark_time();
 	}
+#endif
 	else{
 		main_loop(ia1,ia2,TRUE,PROFMAX_J1,PROFMAX_J2,eval_J1,eval_J2);
 	}
