@@ -14,7 +14,7 @@
 #define VALMAX 48 //IA
 #define VALMIN -48 //J1
 #define PROFMAX 8
-#define PROFMAX_J1 7
+#define PROFMAX_J1 8
 #define PROFMAX_J2 8
 #define INF INT_MAX
 

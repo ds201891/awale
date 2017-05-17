@@ -89,6 +89,23 @@ void printCases(Position *pos){
 	printf("%d]%d\n\n",pos->cases_de_jeu[i],pos->pions_pris_ordi);
 }
 
+int get_prof_dynamic(Position * pos, int ordi_joue, int prof){
+	int res = 0;
+	for(int i = 0; i < TAILLE_CAMP; i++){
+		if(ordi_joue){
+			res += pos->cases_de_jeu[i] != 0 ? 1 : 0;
+		}
+		else{
+			res += pos->cases_de_jeu[i + TAILLE_CAMP] != 0 ? 1 : 0;
+		}
+	}
+	if(res > 10) return prof;
+	else if(res > 8) return prof+1;
+	else if(res > 4) return prof+2;
+	else if(res > 2) return prof+3;
+	return prof+4;
+}
+
 void initPosition(Position *pos){
 	int tmp[TAILLE_GRILLE];
 	int i;
@@ -122,6 +139,7 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 
 	Position pINIT;
 	int ordi_joue = FALSE;
+	int prof_dyn;
 	initPosition(&pINIT);
 	int choix = -1;
 	int nb_tour = 0;
@@ -133,26 +151,27 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 						choix = choix_coup(pINIT,ordi_joue);
 				}
 				else {
+					prof_dyn = get_prof_dynamic(&pINIT, ordi_joue, profMax_j1);
 					if(ia1 == IA_RANDOM){
 						choix = randIA(pINIT,ordi_joue);
 					}
 					else if(ia1 == IA_MINMAX){
-						choix = minmax_ia(pINIT,ordi_joue,profMax_j1, f_J1);
+						choix = minmax_ia(pINIT,ordi_joue,prof_dyn, f_J1);
 					}
 					else if(ia1 == IA_ALPHA_BETA){
-						choix = alpha_beta_ia(pINIT,ordi_joue,profMax_j1, f_J1);
+						choix = alpha_beta_ia(pINIT,ordi_joue,prof_dyn, f_J1);
 					}
 					else if(ia1 == IA_ALPHA_BETA_THREAD){
-						choix = alpha_beta_ia_multi_thread(pINIT,ordi_joue,profMax_j1, f_J1);
+						choix = alpha_beta_ia_multi_thread(pINIT,ordi_joue,prof_dyn, f_J1);
 					}
 					else if(ia1 == IA_MULTI_EVAL){
-						choix = multi_eval_ia(pINIT,ordi_joue,profMax_j1, f_J1, EVAL_LV1);
+						choix = multi_eval_ia(pINIT,ordi_joue,prof_dyn, f_J1, EVAL_LV1);
 					}
 					else{
-						choix = minmax_ia_multi_thread(pINIT,ordi_joue,profMax_j1, f_J1);
+						choix = minmax_ia_multi_thread(pINIT,ordi_joue,prof_dyn, f_J1);
 					}
 				}
-				if(verbose) printf("J1 joue la case %d, profMax_j1=%d\n",choix,profMax_j1);
+				if(verbose) printf("J1 joue la case %d, profMax_j1=%d\n",choix,prof_dyn);
 				if(!coupValide(pINIT,ordi_joue,choix)){
 					printf("error! choix = %d\n",choix);		
 					exit(1);
@@ -165,26 +184,27 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 						choix = choix_coup(pINIT,ordi_joue);
 				}
 				else {
+					prof_dyn = get_prof_dynamic(&pINIT, ordi_joue, profMax_j2);
 					if(ia2 == IA_RANDOM){
 						choix = randIA(pINIT,ordi_joue);
 					}
 					else if(ia2 == IA_MINMAX){
-						choix = minmax_ia(pINIT,ordi_joue,profMax_j2, f_J2);
+						choix = minmax_ia(pINIT,ordi_joue,prof_dyn, f_J2);
 					}
 					else if(ia2 == IA_ALPHA_BETA){
-						choix = alpha_beta_ia(pINIT,ordi_joue,profMax_j2, f_J2);
+						choix = alpha_beta_ia(pINIT,ordi_joue,prof_dyn, f_J2);
 					}
 					else if(ia2 == IA_ALPHA_BETA_THREAD){
-						choix = alpha_beta_ia_multi_thread(pINIT,ordi_joue,profMax_j2, f_J2);
+						choix = alpha_beta_ia_multi_thread(pINIT,ordi_joue,prof_dyn, f_J2);
 					}
 					else if(ia2 == IA_MULTI_EVAL){
-						choix = multi_eval_ia(pINIT,ordi_joue,profMax_j2, f_J2, EVAL_LV1);
+						choix = multi_eval_ia(pINIT,ordi_joue,prof_dyn, f_J2, EVAL_LV1);
 					}
 					else{
-						choix = minmax_ia_multi_thread(pINIT,ordi_joue,profMax_j2, f_J2);
+						choix = minmax_ia_multi_thread(pINIT,ordi_joue,prof_dyn, f_J2);
 					}
 				}
-				if(verbose)printf("J2 joue la case %d, profMax_j2=%d\n",choix,profMax_j2);
+				if(verbose)printf("J2 joue la case %d, profMax_j2=%d\n",choix,prof_dyn);
 				if(!coupValide(pINIT,ordi_joue,choix)){
 					printf("error! choix = %d\n",choix);		
 					exit(1);
@@ -194,17 +214,11 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 		jouerCoup(&pINIT,pINIT,ordi_joue,choix);
 		if(verbose)printCases(&pINIT);
 		if(positionFinale(pINIT,ordi_joue,1)){
-			if(verbose)printf("fin de partie\n");
+			if(verbose)printf("fin de partie en %d tour\n",nb_tour);
 			break;
 		}
 		ordi_joue = !ordi_joue;
-		nb_tour++;
-		/*if(profMax_j1 < 10){
-			profMax_j1 += nb_tour % 20 == 0 ? 1 : 0;
-		}
-		if(profMax_j2 < 10){
-			profMax_j2 += nb_tour % 20 == 0 ? 1 : 0;
-		}*/
+		nb_tour += ordi_joue ? 1 : 0;
 	}
 	return pINIT.pions_pris_joueur * 100 + pINIT.pions_pris_ordi;
 }	
@@ -451,7 +465,7 @@ int alpha_beta_ia(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
 
 int minmax_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
 	//printf("minmax_ia_multi_thread\n");
-	int tab_valeurs[TAILLE_CAMP];
+	int tab_valeurs[TAILLE_CAMP],res;
 	Position pos_next[TAILLE_CAMP];
 
 	int i;
@@ -469,11 +483,19 @@ int minmax_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
 	}
 
 	if(ordi_joue){
-		getMax(tab_valeurs,12,&i);
+		res = getMax(tab_valeurs,12,&i);
 	}
 	else{
-		getMin(tab_valeurs,12,&i);
+		res = getMin(tab_valeurs,12,&i);
 	}
+	//postfix ==================================================================================
+	//aucun coup n'est jouable je renvoie qui gagne. pas de famine!
+	if(res == -100+prof || res == 100-prof){
+		if(pINIT.pions_pris_ordi > pINIT.pions_pris_joueur) return VALMAX;
+		else if(pINIT.pions_pris_ordi < pINIT.pions_pris_joueur) return VALMIN;
+		else return EGALITE;
+	}
+	//==========================================================================================
 	if(!coupValide(pINIT,ordi_joue,i)){
 		i = debloquer_jeu(&pINIT, ordi_joue);
 		if(ordi_joue){i -= 12;}
@@ -485,7 +507,7 @@ int minmax_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
 
 int alpha_beta_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
 	//printf("minmax_ia_multi_thread\n");
-	int tab_valeurs[TAILLE_CAMP];
+	int tab_valeurs[TAILLE_CAMP],res;
 	Position pos_next[TAILLE_CAMP];
 
 	int i;
@@ -501,13 +523,21 @@ int alpha_beta_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL
 			else tab_valeurs[i] = 100;
 		}
 	}
-
+	
 	if(ordi_joue){
-		getMax(tab_valeurs,12,&i);
+		res = getMax(tab_valeurs,12,&i);
 	}
 	else{
-		getMin(tab_valeurs,12,&i);
+		res = getMin(tab_valeurs,12,&i);
 	}
+	//postfix ==================================================================================
+	//aucun coup n'est jouable je renvoie qui gagne. pas de famine!
+	if(res == -100+prof || res == 100-prof){
+		if(pINIT.pions_pris_ordi > pINIT.pions_pris_joueur) return VALMAX;
+		else if(pINIT.pions_pris_ordi < pINIT.pions_pris_joueur) return VALMIN;
+		else return EGALITE;
+	}
+	//==========================================================================================
 	if(!coupValide(pINIT,ordi_joue,i)){
 		i = debloquer_jeu(&pINIT, ordi_joue);
 		if(ordi_joue){i -= 12;}
