@@ -14,7 +14,7 @@
 #define VALMAX 48 //IA
 #define VALMIN -48 //J1
 #define PROFMAX 8
-#define PROFMAX_J1 8
+#define PROFMAX_J1 7
 #define PROFMAX_J2 8
 #define INF INT_MAX
 
@@ -28,6 +28,8 @@
 #define IA_MINMAX 56
 #define IA_MINMAX_THREAD 57
 #define IA_ALPHA_BETA 58
+#define IA_ALPHA_BETA_THREAD 59
+#define IA_MULTI_EVAL 60
 
 #define NB_THREAD 4
 
@@ -67,7 +69,9 @@ int alpha_beta(Position* pos_courante,int ordi_joue,int prof,int profMax, int al
 
 int minmax_ia_multi_thread(Position pINIT, int ordi_joue,int prof,FUNC_EVAL f);
 int minmax_ia(Position pINIT, int ordi_joue,int prof,FUNC_EVAL f);
+int alpha_beta_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f);
 int alpha_beta_ia(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f);
+int multi_eval_ia(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f1,FUNC_EVAL f2);
 
 int evaluation(Position pos_courante, int ordi_joue,int i);
 int evaluation2(Position pos_courante, int ordi_joue,int i);

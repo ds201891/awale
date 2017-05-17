@@ -119,30 +119,16 @@ int test7(){
 int main (int argc, char *argv[]){
 
 	int runTest = FALSE;
-	int ia1 = IA_MINMAX_THREAD;
-	int ia2 = IA_MINMAX_THREAD;
-	int bench = FALSE;
+	int ia1 = IA_ALPHA_BETA_THREAD;
+	int ia2 = IA_ALPHA_BETA_THREAD;
+	//int bench = FALSE;
 	int i;
 	int arg_j1 = FALSE;
 	FUNC_EVAL tab_eval[4] = {EVAL_LV1,EVAL_LV2,EVAL_LV3,EVAL_LV4};
 	FUNC_EVAL eval_J1 = EVAL_LV2;
 	FUNC_EVAL eval_J2 = EVAL_LV2;
 	for(i = 0; i < argc; i++){
-		/*if(!strcmp(argv[i],"-p2")){
-			arg_j1 = FALSE;
-		}
-		else if (!strcmp(argv[i],"-p1")){
-			arg_j1 = TRUE;
-		}
-		else if(!strcmp(argv[i],"random_ia")){
-			if(arg_j1) ia1 = IA_RANDOM;
-			else ia2 = IA_RANDOM;
-		}
-		else if (!strcmp(argv[i],"minmax_ia")){
-			if(arg_j1) ia1 = IA_MINMAX;
-			else ia2 = IA_MINMAX;
-		}
-		else if*/
+
 		if(!strcmp(argv[i],"-t"))runTest = TRUE;
 		else if(!strcmp(argv[i],"-p2_random")) ia2 = IA_RANDOM;
 		else if(!strcmp(argv[i],"-p1_random")) ia1 = IA_RANDOM;
@@ -152,12 +138,16 @@ int main (int argc, char *argv[]){
 		else if(!strcmp(argv[i],"-p2_no_ia")) ia2 = FALSE;
 		else if(!strcmp(argv[i],"-p1_minmax_thread")) ia1 = IA_MINMAX_THREAD;
 		else if(!strcmp(argv[i],"-p2_minmax_thread")) ia2 = IA_MINMAX_THREAD;
+		else if(!strcmp(argv[i],"-p1_alpha_beta_thread")) ia1 = IA_ALPHA_BETA_THREAD;
+		else if(!strcmp(argv[i],"-p2_alpha_beta_thread")) ia2 = IA_ALPHA_BETA_THREAD;
 		else if(!strcmp(argv[i],"-p1_alpha_beta")) ia1 = IA_ALPHA_BETA;
 		else if(!strcmp(argv[i],"-p2_alpha_beta")) ia2 = IA_ALPHA_BETA;
-		else if(!strcmp(argv[i],"-benchmark")) bench = TRUE;
+		//else if(!strcmp(argv[i],"-benchmark")) bench = TRUE;
 		else if(!strcmp(argv[i],"-p2_minmax_thread")) ia2 = IA_MINMAX_THREAD;
 		else if(!strcmp(argv[i],"-p1_alpha_beta")) ia1 = IA_ALPHA_BETA;
 		else if(!strcmp(argv[i],"-p2_alpha_beta")) ia2 = IA_ALPHA_BETA;
+		else if(!strcmp(argv[i],"-p1_multi_eval")) ia1 = IA_MULTI_EVAL;
+		else if(!strcmp(argv[i],"-p2_multi_eval")) ia2 = IA_MULTI_EVAL;	
 #ifdef BENCH
 		//else if(!strcmp(argv[i],"-benchmark")) bench = TRUE;
 #endif
