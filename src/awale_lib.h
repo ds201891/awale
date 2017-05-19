@@ -31,7 +31,7 @@
 #define IA_ALPHA_BETA_THREAD 59
 #define IA_MULTI_EVAL 60
 
-#define NB_THREAD 4
+#define NB_THREAD 12
 
 #define TAILLE_GRILLE 24
 #define TAILLE_CAMP 12

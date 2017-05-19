@@ -321,6 +321,7 @@ int alpha_beta(Position* pos_courante,int ordi_joue,int prof,int profMax, int al
 	}
 	best = !ordi_joue ? INF : -INF;
 	for(i=0; i<TAILLE_CAMP; i++){
+		if(profMax < 15){prof = get_prof_dynamic(pos_courante, ordi_joue, prof) <=3 ? prof+1 : prof;}
 		if (coupValide(*pos_courante,ordi_joue,i)){
 			jouerCoup(&pos_next,*pos_courante,ordi_joue,i);
 			tab_valeurs[i]=alpha_beta(&pos_next, !ordi_joue,prof+1,profMax,alpha,beta,f);
@@ -552,14 +553,12 @@ int alpha_beta_ia_multi_thread(Position pINIT, int ordi_joue, int prof,FUNC_EVAL
 
 int positionFinale(Position Pcourante,int ordi_joue,int prof){
 
-	if(Pcourante.pions_pris_joueur > 48){
+	if(Pcourante.pions_pris_ordi == 48 && Pcourante.pions_pris_joueur == 48){return 3;}
+	else if(Pcourante.pions_pris_joueur >= 48){
 		return 1;
 	}
-	else if(Pcourante.pions_pris_ordi > 48){
+	else if(Pcourante.pions_pris_ordi >= 48){
 		return 2;
-	}
-	else if(Pcourante.pions_pris_ordi >= 42 && Pcourante.pions_pris_joueur >= 42){
-		return 3;
 	}
 	return 0;
 }
