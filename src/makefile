@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-O3 -lpthread -D_REENTRANT -fopenmp -Wall
+CFLAGS=-O3 -lpthread -D_REENTRANT -fopenmp -Wall -std=c99
 LDFLAGS=-fopenmp -Wall
 EXEC=awale
 
