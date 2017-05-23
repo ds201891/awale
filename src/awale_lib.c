@@ -60,8 +60,17 @@ int getMax(int * src, int size,int *index){
 			*index = i;
 		}
 	}
-	return res;	
+	return res;
 }
+//pour le temps
+double getMaxTime(double * timelist){
+  double max = timelist[1];
+  for(int i=1; i<500; i++){
+    if(max < timelist[i]){ max = timelist[i];}
+  }
+  return max;
+}
+
 
 int getMin(int * src, int size,int *index){
 	int i;
@@ -73,7 +82,7 @@ int getMin(int * src, int size,int *index){
 			*index = i;
 		}
 	}
-	return res;	
+	return res;
 }
 
 void printCases(Position *pos){
@@ -128,7 +137,7 @@ int choix_coup(Position pINIT,int ordi_joue){
 		}
 		else{
 			while(OK != getLine("J2 choix(13-24):",buffer,20));
-		}	
+		}
 		if(ordi_joue)choix = atoi(buffer) - TAILLE_CAMP - 1;
 		else choix = atoi(buffer) - 1;
 	}while(!coupValide(pINIT,ordi_joue,choix));
@@ -140,6 +149,22 @@ int choix_coup(Position pINIT,int ordi_joue){
 //=============================================================
 
 int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EVAL f_J1, FUNC_EVAL f_J2){
+  //pour le temps
+    clock_t start;
+    clock_t end;
+    double elapsed_time;
+  //tests temps
+    double tj1[500];
+    double tj2[500];
+    for(int i=0;i<500;i++){
+      tj1[i] = 0;
+      tj2[i] = 0;
+    }
+    int timecounterj1 = 0;
+    int timecounterj2 = 0;
+    int j1maxindex;
+    int j2maxindex;
+  //
 
 	Position pINIT;
 	int ordi_joue = FALSE;
@@ -151,6 +176,9 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 	while(1){
 		if(!ordi_joue){
 			if(randIA(pINIT,ordi_joue) != -1){
+        //temps
+                start = clock();
+        //
 				if(!ia1){
 						choix = choix_coup(pINIT,ordi_joue);
 				}
@@ -174,15 +202,24 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 						choix = minmax_ia_multi_thread(pINIT,ordi_joue,profMax_j1, f_J1);
 					}
 				}
-				if(verbose) printf("J1 joue la case %d, profMax_j1=%d\n",choix+1,profMax_j1);
+//temps
+        end = clock();
+        elapsed_time = (end - start)/(double)CLOCKS_PER_SEC;
+//test temps
+        tj1[timecounterj1] = elapsed_time; timecounterj1++;
+//
+        if(verbose) printf("J1 joue la case %d, profMax_j1=%d\nElapsed time: %.2f.\n",choix+1,profMax_j1,elapsed_time);
 				if(!coupValide(pINIT,ordi_joue,choix)){
-					printf("error! choix = %d\n",choix);		
+					printf("error! choix = %d\n",choix);
 					exit(1);
 				}
 			}
 		}
 		else{
 			if(randIA(pINIT,ordi_joue) != -1){
+//temps
+        start = clock();
+//
 				if(!ia2){
 						choix = choix_coup(pINIT,ordi_joue);
 				}
@@ -206,17 +243,26 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 						choix = minmax_ia_multi_thread(pINIT,ordi_joue,profMax_j2, f_J2);
 					}
 				}
-				if(verbose)printf("J2 joue la case %d, profMax_j2=%d\n",choix+TAILLE_CAMP+1,profMax_j2);
+//temps
+        end = clock();
+        elapsed_time = (end - start)/(double)CLOCKS_PER_SEC;
+//test temps
+        tj2[timecounterj2] = elapsed_time; timecounterj2++;
+//
+        if(verbose)printf("J2 joue la case %d, profMax_j2=%d\nElapsed time: %.2f.\n",choix+TAILLE_CAMP+1,profMax_j2,elapsed_time);
 				if(!coupValide(pINIT,ordi_joue,choix)){
-					printf("error! choix = %d\n",choix);		
+					printf("error! choix = %d\n",choix);
 					exit(1);
-				}				
+				}
 			}
 		}
 		jouerCoup(&pINIT,pINIT,ordi_joue,choix);
 		if(verbose)printCases(&pINIT);
 		if(positionFinale(pINIT,ordi_joue,1) || positionFinale(pINIT,ordi_joue,1) == 5){
 			if(verbose)printf("fin de partie en %d tour\n",nb_tour);
+//temps
+      if(verbose)printf("max J1 : %.2f\nmax J2 : %.2f", getMaxTime(tj1), getMaxTime(tj2));
+//
 			break;
 		}
 		ordi_joue = !ordi_joue;
@@ -224,7 +270,7 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 		nb_tour += ordi_joue ? 1 : 0;
 	}
 	return pINIT.pions_pris_joueur * 100 + pINIT.pions_pris_ordi;
-}	
+}
 
 
 //=============================================================
@@ -236,7 +282,7 @@ int valeurMinMax(Position* pos_courante,int ordi_joue,int prof,int profMax,FUNC_
 
 	// ordi_joue est un booleen qui est vrai si l'ordi joue
 	int tab_valeurs[TAILLE_CAMP];
-	int res,posFinal,i;		
+	int res,posFinal,i;
 	Position pos_next; // En C on crée dans la pile = TRES rapide
  	posFinal = positionFinale(*pos_courante, ordi_joue,prof);
 	if (posFinal){
@@ -271,13 +317,13 @@ int valeurMinMax(Position* pos_courante,int ordi_joue,int prof,int profMax,FUNC_
 			jouerCoup(&pos_next,*pos_courante,ordi_joue,i);
 			// pos_next devient la position courante, et on change le joueur
 			tab_valeurs[i]=valeurMinMax(&pos_next, !ordi_joue,prof+1,profMax,f);
-		} 
+		}
 		else {
 			if (ordi_joue) tab_valeurs[i]= -100+prof;
 			else tab_valeurs[i]= 100-prof;
 		}
 	}
-       
+
 	if (ordi_joue){
 		res = getMax(tab_valeurs,TAILLE_CAMP,&i);
 		// ecrire le code: res contient le MAX de tab_valeurs
@@ -295,7 +341,7 @@ int alpha_beta(Position* pos_courante,int ordi_joue,int prof,int profMax, int al
 	// ordi_joue est un booleen qui est vrai si l'ordi joue
 	int tab_valeurs[TAILLE_CAMP];
 	int posFinal,i,best,tmp, flag;
-	Position pos_next; 
+	Position pos_next;
  	posFinal = positionFinale(*pos_courante, ordi_joue,prof);
 	if (posFinal){
 		switch(posFinal){
@@ -322,11 +368,11 @@ int alpha_beta(Position* pos_courante,int ordi_joue,int prof,int profMax, int al
 	best = !ordi_joue ? INF : -INF;
 	if((prof < profMax/3)&&(ordi_joue == tmp_ordi_joue)){profMax = get_prof_dynamic(pos_courante, ordi_joue, prof) <=2 ? profMax+1 : profMax;}
 	for(i=0; i<TAILLE_CAMP; i++){
-		
+
 		if (coupValide(*pos_courante,ordi_joue,i)){
 			jouerCoup(&pos_next,*pos_courante,ordi_joue,i);
 			tab_valeurs[i]=alpha_beta(&pos_next, !ordi_joue,prof+1,profMax,alpha,beta,f);
-		} 
+		}
 		else {
 			if (ordi_joue) tab_valeurs[i]=-100+prof;
 			else tab_valeurs[i]=+100-prof;
@@ -362,7 +408,7 @@ int alpha_beta(Position* pos_courante,int ordi_joue,int prof,int profMax, int al
 
 int randIA(Position pos,int ordi_joue){
 	int valpossible[TAILLE_CAMP];
-	int index = -1;	
+	int index = -1;
 	int i = 0;
 	int j = TAILLE_CAMP;
 	int r;
@@ -379,7 +425,7 @@ int randIA(Position pos,int ordi_joue){
 	}
 	if(index == -1)return -1;
 	r = rand()%(index+1);
-	return valpossible[r]; 
+	return valpossible[r];
 }
 
 int minmax_ia(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f){
@@ -409,11 +455,11 @@ int multi_eval_ia(Position pINIT, int ordi_joue, int prof,FUNC_EVAL f1,FUNC_EVAL
 			#pragma omp parallel sections
 			{
     			#pragma omp section
-    			{ 
+    			{
 					tab_valeurs_F1[i] = alpha_beta(&pos_next[i], !ordi_joue, 1,prof,-INF,INF,f1);
 				}
     			#pragma omp section
-    			{ 
+    			{
 					tab_valeurs_F2[i] = alpha_beta(&pos_next[i], !ordi_joue, 1,prof,-INF,INF,f2);
 				}
 			}
@@ -579,7 +625,7 @@ int coupValide(Position pos_courante,int ordi_joue,int i){
 }
 
 //=============================================================
-//======================EVAL FUNCTION========================== 
+//======================EVAL FUNCTION==========================
 //=============================================================
 
 int evaluation(Position pos_courante, int ordi_joue,int i){
@@ -598,10 +644,10 @@ int evaluation2(Position pos_courante, int ordi_joue,int i){
 	eval = 0;
 	for(n = 0; n < TAILLE_GRILLE; n++){
 		if(pos_courante.cases_de_jeu[n] == 0 && n < TAILLE_CAMP){
-			eval = ordi_joue ? eval + 1 : eval - 1; 
+			eval = ordi_joue ? eval + 1 : eval - 1;
 		}
 		if(pos_courante.cases_de_jeu[n] == 0 && n >= TAILLE_CAMP){
-			eval = ordi_joue ? eval - 1 : eval + 1; 
+			eval = ordi_joue ? eval - 1 : eval + 1;
 		}
 	}
 	if(!ordi_joue) eval = -eval;
@@ -619,10 +665,10 @@ int evaluation3(Position pos_courante, int ordi_joue,int i){
 	eval = 0;
 	for(n = 0; n < TAILLE_GRILLE; n++){
 		if(pos_courante.cases_de_jeu[n] == 0 && n < TAILLE_CAMP){
-			eval = ordi_joue ? eval + 1 : eval - 1; 
+			eval = ordi_joue ? eval + 1 : eval - 1;
 		}
 		if(pos_courante.cases_de_jeu[n] == 0 && n >= TAILLE_CAMP){
-			eval = ordi_joue ? eval - 1 : eval + 1; 
+			eval = ordi_joue ? eval - 1 : eval + 1;
 		}
 	}
 	if(!ordi_joue) eval = -eval;
@@ -643,7 +689,7 @@ int evaluation4(Position pos_courante, int ordi_joue,int i){
 			if(i+1 >= TAILLE_CAMP) count = 0;
 		}
 		else if(pos_courante.cases_de_jeu[n] == 0 && n >= TAILLE_CAMP){
-			eval = ordi_joue ? eval - count : eval + count; 
+			eval = ordi_joue ? eval - count : eval + count;
 			count++;
 		}
 		else{
@@ -661,7 +707,7 @@ int benchmark(){
 
 	for(prof_j1 = 1; prof_j1 < 8; prof_j1++){
 		for(prof_j2 = 1; prof_j2 < 8; prof_j2++){
-			
+
 			res = main_loop( IA_ALPHA_BETA, IA_ALPHA_BETA, FALSE, prof_j1, prof_j2, EVAL_LV1, EVAL_LV2);
 			scorej1 = res/100;
 			scorej2 = res-(res/100)*100;
