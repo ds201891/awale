@@ -90,12 +90,9 @@ int test6(){
 	printf("test4\n");
 	Position pINIT;
 	initPosition(&pINIT);
-	pINIT.cases_de_jeu[11] = 2;
-	pINIT.cases_de_jeu[12] = 2;
-	pINIT.cases_de_jeu[23] = 6;
-	pINIT.cases_de_jeu[22] = 7;
+	for(int i = 12; i < 24; i++){pINIT.cases_de_jeu[i] = 0;}
 	printCases(&pINIT);
-	printf("%d\n",valeurMinMax(&pINIT,TRUE,0,PROFMAX,evaluation2));
+	printf("%d\n",alpha_beta_ia_multi_thread(pINIT, TRUE, PROFMAX,evaluation2));
 	//for(i = 0; i < 6; i++)pINIT.cases_de_jeu[i] = 1;
 	return 0;
 }
@@ -175,6 +172,7 @@ int main (int argc, char *argv[]){
 	}
 #endif
 	else{
+		//test6();
 		main_loop(ia1,ia2,TRUE,PROFMAX_J1,PROFMAX_J2,eval_J1,eval_J2);
 	}
 	return 0;
