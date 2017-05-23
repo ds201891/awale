@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/time.h>
 #include <string.h>
 #include "awale_lib.h"
 
@@ -64,7 +65,7 @@ int getMax(int * src, int size,int *index){
 }
 //pour le temps
 double getMaxTime(double * timelist){
-  double max = timelist[1];
+  double max = timelist[0];
   for(int i=1; i<500; i++){
     if(max < timelist[i]){ max = timelist[i];}
   }
@@ -150,20 +151,21 @@ int choix_coup(Position pINIT,int ordi_joue){
 
 int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EVAL f_J1, FUNC_EVAL f_J2){
   //pour le temps
-    clock_t start;
-    clock_t end;
-    double elapsed_time;
+  struct timeval tv1;
+  struct timeval tv2;
+  double elapsed_time;
   //tests temps
-    double tj1[500];
-    double tj2[500];
-    for(int i=0;i<500;i++){
-      tj1[i] = 0;
-      tj2[i] = 0;
-    }
-    int timecounterj1 = 0;
-    int timecounterj2 = 0;
-    int j1maxindex;
-    int j2maxindex;
+  double tj1[500];
+  double tj2[500];
+  for(int i=0;i<500;i++){
+    tj1[i] = 0;
+    tj2[i] = 0;
+  }
+  int timecounterj1 = 0;
+  int timecounterj2 = 0;
+  int j1maxindex;
+  int j2maxindex;
+  int timeres = -1;
   //
 
 	Position pINIT;
@@ -176,9 +178,12 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 	while(1){
 		if(!ordi_joue){
 			if(randIA(pINIT,ordi_joue) != -1){
-        //temps
-                start = clock();
-        //
+//temps
+        timeres = -1;
+        while (timeres == -1){
+          timeres = gettimeofday(&tv1, NULL);
+        }
+//
 				if(!ia1){
 						choix = choix_coup(pINIT,ordi_joue);
 				}
@@ -203,12 +208,15 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 					}
 				}
 //temps
-        end = clock();
-        elapsed_time = (end - start)/(double)CLOCKS_PER_SEC;
+        timeres = -1;
+        while (timeres == -1){
+          timeres = gettimeofday(&tv2, NULL);
+        }
+        elapsed_time = (((tv2.tv_sec * 1e6) + tv2.tv_usec) - ((tv1.tv_sec * 1e6) + tv1.tv_usec)) * 1e-6;
 //test temps
         tj1[timecounterj1] = elapsed_time; timecounterj1++;
 //
-        if(verbose) printf("J1 joue la case %d, profMax_j1=%d\nElapsed time: %.2f.\n",choix+1,profMax_j1,elapsed_time);
+        if(verbose) printf("J1 joue la case %d, profMax_j1=%d\nElapsed time: %lf.\n",choix+1,profMax_j1,elapsed_time);
 				if(!coupValide(pINIT,ordi_joue,choix)){
 					printf("error! choix = %d\n",choix);
 					exit(1);
@@ -218,7 +226,10 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 		else{
 			if(randIA(pINIT,ordi_joue) != -1){
 //temps
-        start = clock();
+        timeres = -1;
+        while (timeres == -1){
+          timeres = gettimeofday(&tv1, NULL);
+        }
 //
 				if(!ia2){
 						choix = choix_coup(pINIT,ordi_joue);
@@ -244,12 +255,15 @@ int main_loop(int ia1,int ia2,int verbose,int profMax_j1, int profMax_j2,FUNC_EV
 					}
 				}
 //temps
-        end = clock();
-        elapsed_time = (end - start)/(double)CLOCKS_PER_SEC;
+        timeres = -1;
+        while (timeres == -1){
+          timeres = gettimeofday(&tv2, NULL);
+        }
+        elapsed_time = (((tv2.tv_sec * 1e6) + tv2.tv_usec) - ((tv1.tv_sec * 1e6) + tv1.tv_usec)) * 1e-6;
 //test temps
         tj2[timecounterj2] = elapsed_time; timecounterj2++;
 //
-        if(verbose)printf("J2 joue la case %d, profMax_j2=%d\nElapsed time: %.2f.\n",choix+TAILLE_CAMP+1,profMax_j2,elapsed_time);
+        if(verbose)printf("J2 joue la case %d, profMax_j2=%d\nElapsed time: %lf.\n",choix+TAILLE_CAMP+1,profMax_j2,elapsed_time);
 				if(!coupValide(pINIT,ordi_joue,choix)){
 					printf("error! choix = %d\n",choix);
 					exit(1);
